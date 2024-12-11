@@ -3,12 +3,14 @@ package com.nimap.infotech.productmanagement.serviceimpl;
 
 import com.nimap.infotech.productmanagement.dto.CategoryDTO;
 import com.nimap.infotech.productmanagement.entity.Category;
+import com.nimap.infotech.productmanagement.exception.ResourceNotFoundException;
 import com.nimap.infotech.productmanagement.repository.CategoryRepository;
 import com.nimap.infotech.productmanagement.service.CategoryService;
 
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -16,57 +18,73 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
 public class CategoryServiceImpl implements CategoryService {
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
+	
+	private static final int PAGE_SIZE = 10;
+	
+	@Autowired
+    private CategoryRepository catRepo;
+	
+	
     @Override
-    public List<CategoryDTO> getAllCategories(int page, int size) {
-        var pageable = PageRequest.of(page, size);
-        var categories = categoryRepository.findAll(pageable).getContent();
-        return categories.stream().map(this::convertToDTO).collect(Collectors.toList());
-    }
+    public Page<Category> getAllCategories(int page) {
+    	
+	      return catRepo.findAll(PageRequest.of(page, PAGE_SIZE));
+	}
+    
+//	@Override
+//	public List<Category> getAllCategories() {
+//	
+//		  return catRepo.findByIsDeleted(1);
+//	}
 
-    @Override
-    public CategoryDTO getCategoryById(Long id) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
-        return convertToDTO(category);
-    }
+	@Override
+	public Category getCategoryById(int id) {
+		
+		return catRepo.findById(id).orElse(null);
+	}
 
-    @Override
-    public CategoryDTO createCategory(CategoryDTO categoryDTO) {
-        Category category = new Category();
-        category.setName(categoryDTO.getName());
-        category.setDescription(categoryDTO.getDescription());
-        category = categoryRepository.save(category);
-        return convertToDTO(category);
-    }
+	@Override
+	public Category createCategory(Category category) {
+		
+		 return catRepo.save(category);
+	}
 
-    @Override
-    public CategoryDTO updateCategory(Long id, CategoryDTO categoryDTO) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
-        category.setName(categoryDTO.getName());
-        category.setDescription(categoryDTO.getDescription());
-        category = categoryRepository.save(category);
-        return convertToDTO(category);
-    }
+	@Override
+	public Category updateCategory(int id, Category category) {
 
-    @Override
-    public void deleteCategory(Long id) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
-        categoryRepository.delete(category);
-    }
+		Category existing = catRepo.findById(id).orElse(null);
+        if (existing != null) {
+            existing.setCategoryName(category.getCategoryName());    
+            return catRepo.save(existing);
+        }
+        return null;
+	}
 
-    private CategoryDTO convertToDTO(Category category) {
-        CategoryDTO dto = new CategoryDTO();
-        dto.setCategoryId(category.getCategoryId());
-        dto.setName(category.getName());
-        dto.setDescription(category.getDescription());
-        return dto;
-    }
+	@Override
+	public void deleteCategory(int id) {
+		
+		 Category existing = catRepo.findById(id).orElse(null);
+	        if (existing != null) {
+	            existing.setIsDeleted(0);
+	            catRepo.save(existing);
+	        }
+	}
+
+	@Override
+	public List<Category> getDeletedCategories() {
+	
+		return catRepo.findByIsDeleted(0); // Fetch only deleted ones (isDeleted = 0)
+	}
+
+	@Override
+	public void restoreCategory(int id) {
+		
+		 Category category = catRepo.findById(id)
+		        .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
+		 category.setIsDeleted(1); // Restore by setting isDeleted to 1
+		 catRepo.save(category);
+	}
+
+
 }

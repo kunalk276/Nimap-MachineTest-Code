@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class NimapinfotechmachinetestApplication {
+public class NimapInfotechMachineTestApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(NimapinfotechmachinetestApplication.class, args);
+		SpringApplication.run(NimapInfotechMachineTestApplication.class, args);
 	}
 
 }

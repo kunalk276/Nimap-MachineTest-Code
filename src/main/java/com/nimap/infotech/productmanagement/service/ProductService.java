@@ -1,13 +1,31 @@
 package com.nimap.infotech.productmanagement.service;
 
-import com.nimap.infotech.productmanagement.dto.ProductDTO;
+
+import com.nimap.infotech.productmanagement.dto.ProductJoin;
+import com.nimap.infotech.productmanagement.entity.Product;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+
 public interface ProductService {
-    List<ProductDTO> getAllProducts(int page, int size);
-    ProductDTO getProductById(Long id);
-    ProductDTO createProduct(ProductDTO productDTO);
-    ProductDTO updateProduct(Long id, ProductDTO productDTO);
-    void deleteProduct(Long id);
+	
+    Page<Product> getAllProducts(int page);
+	 //List<Product> getAllProducts();
+	 
+//	 Product getProductById(long id);
+	 
+	 ProductJoin getProductJoinById(int id);
+	 
+    Product createProduct(Product product);
+   
+	 Product updateProduct(int id, Product product);
+	 
+	 void deleteProduct(int id);
+	 
+	 List<Product> getDeletedProducts();
+	 
+	 void restoreProduct(int id);
+
+
 }

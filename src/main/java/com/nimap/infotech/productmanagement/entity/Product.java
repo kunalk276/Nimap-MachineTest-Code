@@ -1,5 +1,6 @@
 package com.nimap.infotech.productmanagement.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
@@ -17,41 +18,31 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
+@Entity
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "products")
+@Table(name="products")
 public class Product {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int productId;
+	
+	@Column(length=100, nullable = false)
+	private String productName;
+	
+	@Column(nullable = false)
+	private int isDeleted = 1;
+	
+	 @ManyToOne
+	 @JoinColumn(name = "category_id", nullable = false) 
+	 @JsonBackReference 
+	 private Category category;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "product_id")
-    private Long productId;
-
-    @NotBlank(message = "Product name cannot be blank")
-    @Size(min = 2, max = 100, message = "Product name must be between 2 and 100 characters")
-    @Column(name = "name", nullable = false)
-    private String name;
-
-    @Size(max = 250, message = "Description can be up to 250 characters")
-    @Column(name = "description", length = 250)
-    private String description;
-
-    @NotNull(message = "Price is mandatory")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
-    @Column(name = "price")
-    private double price;
-
-
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private Category category;
-
-    
 }

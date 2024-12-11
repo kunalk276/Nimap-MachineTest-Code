@@ -1,13 +1,28 @@
 package com.nimap.infotech.productmanagement.service;
 
-import com.nimap.infotech.productmanagement.dto.CategoryDTO;
+
+import com.nimap.infotech.productmanagement.entity.Category;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+
 public interface CategoryService {
-    List<CategoryDTO> getAllCategories(int page, int size);
-    CategoryDTO getCategoryById(Long id);
-    CategoryDTO createCategory(CategoryDTO categoryDTO);
-    CategoryDTO updateCategory(Long id, CategoryDTO categoryDTO);
-    void deleteCategory(Long id);
+	
+	Page<Category> getAllCategories(int page);
+	
+	 
+	 Category getCategoryById(int id);
+	 
+    Category createCategory(Category category);
+   
+	 Category updateCategory(int id, Category category);
+	 
+	 void deleteCategory(int id);
+	 
+	 List<Category> getDeletedCategories();
+	 
+	 void restoreCategory(int id);
+
+
 }

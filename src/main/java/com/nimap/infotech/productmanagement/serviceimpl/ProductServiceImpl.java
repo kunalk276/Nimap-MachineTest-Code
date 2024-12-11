@@ -1,84 +1,101 @@
 package com.nimap.infotech.productmanagement.serviceimpl;
 
+import java.util.List;
 
-import com.nimap.infotech.productmanagement.dto.ProductDTO;
-import com.nimap.infotech.productmanagement.entity.Product;
-import com.nimap.infotech.productmanagement.repository.ProductRepository;
-import com.nimap.infotech.productmanagement.service.ProductService;
-
-import jakarta.transaction.Transactional;
-
-import com.nimap.infotech.productmanagement.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.nimap.infotech.productmanagement.dto.ProductJoin;
+import com.nimap.infotech.productmanagement.entity.Product;
+import com.nimap.infotech.productmanagement.exception.ResourceNotFoundException;
+import com.nimap.infotech.productmanagement.repository.ProductRepository;
+import com.nimap.infotech.productmanagement.service.ProductService;
 
 @Service
-@Transactional
-public class ProductServiceImpl implements ProductService {
+public class ProductServiceImpl implements ProductService{
+	
+    private static final int PAGE_SIZE = 10;
+	
+	@Autowired
+    private ProductRepository proRepo;
+	
+	@Override
+    public Page<Product> getAllProducts(int page) {
+		
+        return proRepo.findAll(PageRequest.of(page, PAGE_SIZE));
+    }
 
-    @Autowired
-    private ProductRepository productRepository;
+//	@Override
+//	public List<Product> getAllProducts() {
+//	
+//		  return proRepo.findByIsDeleted(1);
+//	}
 
-    @Autowired
-    private CategoryRepository categoryRepository;
+//	@Override
+//	public Product getProductById(long id) {
+//		
+//		return proRepo.findById(id).orElse(null);
+//	}
 
+	@Override
+	public Product createProduct(Product product) {
+		
+		 return proRepo.save(product);
+	}
+	
+	
+	
+
+	@Override
+	public Product updateProduct(int id, Product product) {
+
+		Product existing = proRepo.findById(id).orElse(null);
+        if (existing != null) {
+            existing.setProductName(product.getProductName());    
+            return proRepo.save(existing);
+        }
+        return null;
+	}
+
+	@Override
+	public void deleteProduct(int id) {
+		
+		 Product existing = proRepo.findById(id).orElse(null);
+	        if (existing != null) {
+	            existing.setIsDeleted(0);
+	            proRepo.save(existing);
+	        }
+	}
+
+	@Override
+	public List<Product> getDeletedProducts() {
+	
+		return proRepo.findByIsDeleted(0); // Fetch only deleted ones (isDeleted = 0)
+	}
+
+	@Override
+	public void restoreProduct(int id) {
+		
+		 Product product = proRepo.findById(id)
+		        .orElseThrow(() -> new ResourceNotFoundException("product not found with id: " + id));
+		 product.setIsDeleted(1); // Restore by setting isDeleted to 1
+		 proRepo.save(product);
+	}
+
+	
+	
     @Override
-    public List<ProductDTO> getAllProducts(int page, int size) {
-        var pageable = PageRequest.of(page, size);
-        var products = productRepository.findAll(pageable).getContent();
-        return products.stream().map(this::convertToDTO).collect(Collectors.toList());
+    public ProductJoin getProductJoinById(int id) {
+        Product product = proRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + id));
+        return new ProductJoin(
+                product.getProductId(),
+                product.getProductName(),
+                product.getCategory().getCategoryId(),
+                product.getCategory().getCategoryName()
+        );
     }
 
-    @Override
-    public ProductDTO getProductById(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-        return convertToDTO(product);
-    }
-
-    @Override
-    public ProductDTO createProduct(ProductDTO productDTO) {
-        Product product = new Product();
-        product.setName(productDTO.getName());
-        product.setDescription(productDTO.getDescription());
-        product.setPrice(productDTO.getPrice());
-        product.setCategory(categoryRepository.findById(productDTO.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found")));
-        product = productRepository.save(product);
-        return convertToDTO(product);
-    }
-
-    @Override
-    public ProductDTO updateProduct(Long id, ProductDTO productDTO) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-        product.setName(productDTO.getName());
-        product.setDescription(productDTO.getDescription());
-        product.setPrice(productDTO.getPrice());
-        product.setCategory(categoryRepository.findById(productDTO.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found")));
-        product = productRepository.save(product);
-        return convertToDTO(product);
-    }
-
-    @Override
-    public void deleteProduct(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-        productRepository.delete(product);
-    }
-
-    private ProductDTO convertToDTO(Product product) {
-        ProductDTO dto = new ProductDTO();
-        dto.setProductId(product.getProductId());
-        dto.setName(product.getName());
-        dto.setDescription(product.getDescription());
-        dto.setPrice(product.getPrice());
-        dto.setCategoryId(product.getCategory().getCategoryId());
-        return dto;
-    }
 }
