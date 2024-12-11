@@ -11,9 +11,6 @@ import org.springframework.data.domain.Page;
 public interface ProductService {
 	
     Page<Product> getAllProducts(int page);
-	 //List<Product> getAllProducts();
-	 
-//	 Product getProductById(long id);
 	 
 	 ProductJoin getProductJoinById(int id);
 	 

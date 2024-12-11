@@ -27,17 +27,6 @@ public class ProductServiceImpl implements ProductService{
         return proRepo.findAll(PageRequest.of(page, PAGE_SIZE));
     }
 
-//	@Override
-//	public List<Product> getAllProducts() {
-//	
-//		  return proRepo.findByIsDeleted(1);
-//	}
-
-//	@Override
-//	public Product getProductById(long id) {
-//		
-//		return proRepo.findById(id).orElse(null);
-//	}
 
 	@Override
 	public Product createProduct(Product product) {
@@ -45,9 +34,6 @@ public class ProductServiceImpl implements ProductService{
 		 return proRepo.save(product);
 	}
 	
-	
-	
-
 	@Override
 	public Product updateProduct(int id, Product product) {
 
@@ -72,7 +58,7 @@ public class ProductServiceImpl implements ProductService{
 	@Override
 	public List<Product> getDeletedProducts() {
 	
-		return proRepo.findByIsDeleted(0); // Fetch only deleted ones (isDeleted = 0)
+		return proRepo.findByIsDeleted(0); 
 	}
 
 	@Override
@@ -80,7 +66,7 @@ public class ProductServiceImpl implements ProductService{
 		
 		 Product product = proRepo.findById(id)
 		        .orElseThrow(() -> new ResourceNotFoundException("product not found with id: " + id));
-		 product.setIsDeleted(1); // Restore by setting isDeleted to 1
+		 product.setIsDeleted(1); 
 		 proRepo.save(product);
 	}
 

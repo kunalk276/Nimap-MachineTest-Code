@@ -32,12 +32,6 @@ public class CategoryServiceImpl implements CategoryService {
 	      return catRepo.findAll(PageRequest.of(page, PAGE_SIZE));
 	}
     
-//	@Override
-//	public List<Category> getAllCategories() {
-//	
-//		  return catRepo.findByIsDeleted(1);
-//	}
-
 	@Override
 	public Category getCategoryById(int id) {
 		
@@ -74,7 +68,7 @@ public class CategoryServiceImpl implements CategoryService {
 	@Override
 	public List<Category> getDeletedCategories() {
 	
-		return catRepo.findByIsDeleted(0); // Fetch only deleted ones (isDeleted = 0)
+		return catRepo.findByIsDeleted(0); 
 	}
 
 	@Override
@@ -82,7 +76,7 @@ public class CategoryServiceImpl implements CategoryService {
 		
 		 Category category = catRepo.findById(id)
 		        .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
-		 category.setIsDeleted(1); // Restore by setting isDeleted to 1
+		 category.setIsDeleted(1); 
 		 catRepo.save(category);
 	}
 
